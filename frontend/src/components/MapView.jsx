@@ -154,12 +154,29 @@ const MapView = () => {
     <Box>
       {/* Panneau de contrôle distance */}
       {selectedBuildings.length > 0 && (
-        <Paper elevation={3} sx={{ p: 2, mb: 2, bgcolor: 'primary.light' }}>
+        <Paper 
+          elevation={3} 
+          sx={{ 
+            p: 2, 
+            mb: 2, 
+            bgcolor: 'rgba(20, 20, 20, 0.95)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(184, 255, 0, 0.2)',
+            borderRadius: 2,
+          }}
+        >
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-            <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#b8ff00' }}>
               <CalculateIcon /> Calculer la distance
             </Typography>
-            <IconButton size="small" onClick={clearSelection} color="error">
+            <IconButton 
+              size="small" 
+              onClick={clearSelection} 
+              sx={{ 
+                color: '#ff4757',
+                '&:hover': { bgcolor: 'rgba(255, 71, 87, 0.15)' }
+              }}
+            >
               <ClearIcon />
             </IconButton>
           </Box>
@@ -169,9 +186,14 @@ const MapView = () => {
               <Chip
                 key={building.id}
                 label={`${index + 1}. ${building.id}`}
-                color="primary"
-                icon={<LocationIcon />}
+                icon={<LocationIcon sx={{ color: '#b8ff00 !important' }} />}
                 onDelete={() => handleBuildingClick(building.data, building.id)}
+                sx={{
+                  bgcolor: 'rgba(184, 255, 0, 0.15)',
+                  color: '#b8ff00',
+                  border: '1px solid rgba(184, 255, 0, 0.3)',
+                  '& .MuiChip-deleteIcon': { color: 'rgba(255, 255, 255, 0.6)' },
+                }}
               />
             ))}
           </Box>
@@ -183,26 +205,55 @@ const MapView = () => {
               startIcon={<CalculateIcon />}
               onClick={calculateDistance}
               disabled={calculatingDistance}
+              sx={{
+                bgcolor: '#b8ff00',
+                color: '#000',
+                fontWeight: 600,
+                py: 1.5,
+                '&:hover': {
+                  bgcolor: '#a0e000',
+                  boxShadow: '0 0 20px rgba(184, 255, 0, 0.4)',
+                },
+                '&.Mui-disabled': {
+                  bgcolor: 'rgba(184, 255, 0, 0.3)',
+                  color: 'rgba(0, 0, 0, 0.5)',
+                },
+              }}
             >
               {calculatingDistance ? 'Calcul en cours...' : 'Calculer la distance'}
             </Button>
           )}
 
           {selectedBuildings.length < 2 && (
-            <Alert severity="info" sx={{ mt: 1 }}>
+            <Alert 
+              severity="info" 
+              sx={{ 
+                mt: 1,
+                bgcolor: 'rgba(0, 200, 255, 0.1)',
+                border: '1px solid rgba(0, 200, 255, 0.3)',
+                color: '#00d4ff',
+                '& .MuiAlert-icon': { color: '#00d4ff' },
+              }}
+            >
               Sélectionnez {2 - selectedBuildings.length} bâtiment(s) supplémentaire(s) sur la carte
             </Alert>
           )}
 
           {distance && (
-            <Box sx={{ mt: 2, p: 2, bgcolor: 'success.light', borderRadius: 1 }}>
-              <Typography variant="h6" gutterBottom>
+            <Box sx={{ 
+              mt: 2, 
+              p: 2, 
+              bgcolor: 'rgba(0, 255, 157, 0.1)', 
+              border: '1px solid rgba(0, 255, 157, 0.3)',
+              borderRadius: 2,
+            }}>
+              <Typography variant="h6" gutterBottom sx={{ color: '#00ff9d' }}>
                 📏 Distance calculée
               </Typography>
-              <Typography variant="body1">
-                <strong>{distance.distance.kilometers} km</strong> ({distance.distance.meters} m)
+              <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.95)' }}>
+                <strong style={{ color: '#00ff9d', fontSize: '1.2em' }}>{distance.distance.kilometers} km</strong> ({distance.distance.meters} m)
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.5)' }}>
                 Distance à vol d'oiseau (ligne droite)
               </Typography>
             </Box>
@@ -210,14 +261,36 @@ const MapView = () => {
         </Paper>
       )}
 
-      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="body1" color="text.secondary">
-          {batiments.length} bâtiment(s) trouvé(s)
+      <Box 
+        sx={{ 
+          mb: 2, 
+          p: 1.5,
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          bgcolor: 'rgba(255, 255, 255, 0.03)',
+          borderRadius: 2,
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+        }}
+      >
+        <Typography 
+          variant="body1" 
+          sx={{ 
+            color: 'rgba(255, 255, 255, 0.8)',
+            fontWeight: 500,
+          }}
+        >
+          🏢 {batiments.length} bâtiment(s) trouvé(s)
         </Typography>
         <Chip 
-          label={`${batiments.filter(b => b.latitude && b.longitude).length} géolocalisé(s)`} 
-          color="primary" 
-          size="small" 
+          label={`📍 ${batiments.filter(b => b.latitude && b.longitude).length} géolocalisé(s)`} 
+          size="small"
+          sx={{
+            bgcolor: 'rgba(184, 255, 0, 0.15)',
+            color: '#b8ff00',
+            border: '1px solid rgba(184, 255, 0, 0.3)',
+            fontWeight: 500,
+          }}
         />
       </Box>
 
@@ -294,30 +367,43 @@ const MapView = () => {
                   }}
                 >
                   <Popup>
-                    <Box sx={{ minWidth: 200 }}>
-                      <Typography variant="h6" gutterBottom>
-                        {batimentId}
-                      </Typography>
+                    <div style={{ 
+                      minWidth: 200, 
+                      padding: '8px',
+                      backgroundColor: '#1a1a1a',
+                      borderRadius: '8px',
+                      margin: '-13px -19px',
+                    }}>
+                      <div style={{ color: '#b8ff00', fontWeight: 600, fontSize: '1.1rem', marginBottom: '8px' }}>
+                        🏢 {batimentId}
+                      </div>
                       {batiment.anneeC && (
-                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                        <div style={{ color: '#e0e0e0', fontSize: '0.9rem', marginBottom: '4px' }}>
                           📅 Année: {batiment.anneeC}
-                        </Typography>
+                        </div>
                       )}
-                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                      <div style={{ color: '#aaaaaa', fontSize: '0.8rem', marginTop: '8px' }}>
                         📍 {batiment.latitude?.toFixed(5)}, {batiment.longitude?.toFixed(5)}
-                      </Typography>
+                      </div>
                       
                       <Button
                         fullWidth
                         size="small"
-                        variant={selected ? "outlined" : "contained"}
-                        color={selected ? "error" : "primary"}
-                        sx={{ mt: 2 }}
+                        variant="contained"
+                        sx={{ 
+                          mt: 2,
+                          bgcolor: selected ? '#ff4757' : '#b8ff00',
+                          color: selected ? '#fff' : '#000',
+                          fontWeight: 600,
+                          '&:hover': {
+                            bgcolor: selected ? '#ff6b7a' : '#a0e000',
+                          },
+                        }}
                         onClick={() => handleBuildingClick(batiment, batimentId)}
                       >
                         {selected ? 'Désélectionner' : 'Sélectionner'}
                       </Button>
-                    </Box>
+                    </div>
                   </Popup>
                 </Marker>
               );

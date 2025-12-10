@@ -1,9 +1,9 @@
 package Ex.control;
 
 import Ex.domain.BatimentRepository;
-import Ex.dto.BatimentInfo;
-import Ex.dto.DistanceInfo;
-import Ex.dto.DistanceResponse;
+import Ex.dto.BatimentInfoDto;
+import Ex.dto.DistanceInfoDto;
+import Ex.dto.DistanceResponseDto;
 import Ex.modele.Batiment;
 import org.apache.lucene.util.SloppyMath;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,12 +55,12 @@ public class DistanceController {
         );
 
         // Mapper les entités BD vers DTOs (séparation des couches)
-        BatimentInfo bat1DTO = mapToDTO(bat1);
-        BatimentInfo bat2DTO = mapToDTO(bat2);
-        DistanceInfo distanceDTO = createDistanceInfo(distanceMeters);
+        BatimentInfoDto bat1DTO = mapToDTO(bat1);
+        BatimentInfoDto bat2DTO = mapToDTO(bat2);
+        DistanceInfoDto distanceDTO = createDistanceInfo(distanceMeters);
 
         // Créer la réponse avec les DTOs
-        DistanceResponse response = new DistanceResponse(bat1DTO, bat2DTO, distanceDTO);
+        DistanceResponseDto response = new DistanceResponseDto(bat1DTO, bat2DTO, distanceDTO);
         
         return ResponseEntity.ok(response);
     }
@@ -69,14 +69,14 @@ public class DistanceController {
      * Calculer la distance avec des coordonnées GPS directes
      */
     @GetMapping("/calculate")
-    public ResponseEntity<DistanceInfo> calculateDistance(
+    public ResponseEntity<DistanceInfoDto> calculateDistance(
             @RequestParam Double lat1,
             @RequestParam Double lon1,
             @RequestParam Double lat2,
             @RequestParam Double lon2) {
         
         double distanceMeters = SloppyMath.haversinMeters(lat1, lon1, lat2, lon2);
-        DistanceInfo response = createDistanceInfo(distanceMeters);
+        DistanceInfoDto response = createDistanceInfo(distanceMeters);
         
         return ResponseEntity.ok(response);
     }
@@ -84,11 +84,11 @@ public class DistanceController {
     // ===== Méthodes de mapping (BD -> DTO) =====
 
     /**
-     * Mapper une entité Batiment vers un DTO BatimentInfo
+     * Mapper une entité Batiment vers un DTO BatimentInfoDto
      * Séparation entre modèle BD et contrat API
      */
-    private BatimentInfo mapToDTO(Batiment batiment) {
-        return new BatimentInfo(
+    private BatimentInfoDto mapToDTO(Batiment batiment) {
+        return new BatimentInfoDto(
             batiment.getCodeB(),
             batiment.getLatitude(),
             batiment.getLongitude(),
@@ -97,13 +97,13 @@ public class DistanceController {
     }
 
     /**
-     * Créer un DTO DistanceInfo à partir d'une distance en mètres
+     * Créer un DTO DistanceInfoDto à partir d'une distance en mètres
      */
-    private DistanceInfo createDistanceInfo(double distanceMeters) {
+    private DistanceInfoDto createDistanceInfo(double distanceMeters) {
         double meters = Math.round(distanceMeters * 100.0) / 100.0;
         double kilometers = Math.round(distanceMeters / 10.0) / 100.0;
         
-        return new DistanceInfo(
+        return new DistanceInfoDto(
             meters,
             kilometers,
             "haversine",

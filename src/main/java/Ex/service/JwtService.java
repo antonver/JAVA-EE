@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
+import Ex.modele.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -42,9 +42,8 @@ public class JwtService {
                 .collect(Collectors.joining(","));
         claims.put("roles", roles);
         
-        // Добавляем fullName если это наш User
-        if (userDetails instanceof Ex.modele.User) {
-            Ex.modele.User user = (Ex.modele.User) userDetails;
+        if (userDetails instanceof User) {
+            User user = (User) userDetails;
             claims.put("fullName", user.getFullName());
         }
 

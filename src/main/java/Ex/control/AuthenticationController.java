@@ -1,7 +1,7 @@
 package Ex.control;
 
-import Ex.dtos.LoginUserDto;
-import Ex.dtos.RegisterUserDto;
+import Ex.dto.LoginUserDto;
+import Ex.dto.RegisterUserDto;
 import Ex.modele.User;
 import Ex.responses.LoginResponse;
 import Ex.service.AuthenticationService;

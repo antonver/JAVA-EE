@@ -38,6 +38,8 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
+                        // Allow all OPTIONS preflight requests (CORS)
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                         // Разрешить доступ к Swagger UI и документации API
                         .requestMatchers("/api/docs/**", "/api/docs").permitAll()
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html").permitAll()
@@ -59,13 +61,19 @@ public class SecurityConfiguration {
                         .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/salles/**").hasRole("GESTIONNAIRE")
                         // Разрешить доступ к API расстояния
                         .requestMatchers("/distance/**").permitAll()
+                        
+                        // Доступ к профилю пользователя - для любого аутентифицированного пользователя
+                        // ВАЖНО: это правило должно быть ПЕРЕД общим /users/** правилом
+                        .requestMatchers("/users/me").authenticated()
+                        
                         // Доступ к админским эндпоинтам (GESTIONNAIRE)
                         .requestMatchers("/users/**").hasRole("GESTIONNAIRE")
                         .requestMatchers("/campus/**").hasRole("GESTIONNAIRE")
+                        .requestMatchers("/campus-admin/**").hasRole("GESTIONNAIRE")
                         .requestMatchers("/composantes/**").hasRole("GESTIONNAIRE")
                         .requestMatchers("/universites/**").hasRole("GESTIONNAIRE")
                         .requestMatchers("/reservations/**").hasAnyRole("GESTIONNAIRE", "ENSEIGNANT")
-
+                        
                         // Admin endpoints (custom controllers)
                         .requestMatchers("/admin/**").hasRole("GESTIONNAIRE")
                         .requestMatchers("/management/**").hasRole("GESTIONNAIRE")
@@ -85,6 +93,7 @@ public class SecurityConfiguration {
         // Разрешаем запросы с фронтенда
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:5173",
+                "http://localhost:5174",
                 "http://127.0.0.1:5173"
         ));
 

@@ -20,14 +20,14 @@ public class OpenApiConfig {
             .info(new Info()
                 .title("University Management API")
                 .version("1.0")
-                .description("API для управления университетом, кампусами и пользователями")
+                .description("Pour la gestion des campus, des batiments, des salles et des reservations")
                 .contact(new Contact()
                     .name("API Support")
                     .email("support@university.com")))
-            // Добавить требование безопасности ко всем эндпоинтам
+
             .addSecurityItem(new SecurityRequirement()
                 .addList(securitySchemeName))
-            // Определить схему безопасности Bearer JWT
+    
             .components(new Components()
                 .addSecuritySchemes(securitySchemeName, 
                     new SecurityScheme()
@@ -35,6 +35,6 @@ public class OpenApiConfig {
                         .type(SecurityScheme.Type.HTTP)
                         .scheme("bearer")
                         .bearerFormat("JWT")
-                        .description("Введите JWT токен (без слова 'Bearer')")));
+                        .description("Saisir le token JWT (sans le mot 'Bearer')")));
     }
 }

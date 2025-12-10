@@ -2,8 +2,8 @@ package Ex.control;
 
 import Ex.domain.ReservationRepository;
 import Ex.domain.SalleRepository;
-import Ex.dto.ReservationRequest;
-import Ex.dto.ReservationResponse;
+import Ex.dto.ReservationRequestDto;
+import Ex.dto.ReservationResponseDto;
 import Ex.modele.Reservation;
 import Ex.modele.Salle;
 import Ex.modele.User;
@@ -13,7 +13,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,7 +33,7 @@ public class ReservationController {
      * Créer une nouvelle réservation
      */
     @PostMapping
-    public ResponseEntity<?> createReservation(@RequestBody ReservationRequest request) {
+    public ResponseEntity<?> createReservation(@RequestBody ReservationRequestDto request) {
         // Récupérer l'utilisateur connecté
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User enseignant = (User) authentication.getPrincipal();
@@ -83,7 +82,7 @@ public class ReservationController {
      * Récupérer toutes les réservations de l'enseignant connecté
      */
     @GetMapping("/mes-reservations")
-    public ResponseEntity<List<ReservationResponse>> getMesReservations() {
+    public ResponseEntity<List<ReservationResponseDto>> getMesReservations() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User enseignant = (User) authentication.getPrincipal();
         
@@ -96,7 +95,7 @@ public class ReservationController {
             System.out.println("  - ID: " + r.getId() + ", Salle: " + r.getSalle().getNumS() + ", Matière: " + r.getMatiere())
         );
         
-        List<ReservationResponse> response = reservations.stream()
+        List<ReservationResponseDto> response = reservations.stream()
             .map(this::mapToDTO)
             .collect(Collectors.toList());
         
@@ -109,10 +108,10 @@ public class ReservationController {
      * Récupérer toutes les réservations (admin)
      */
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> getAllReservations() {
+    public ResponseEntity<List<ReservationResponseDto>> getAllReservations() {
         List<Reservation> reservations = reservationRepository.findAll();
         
-        List<ReservationResponse> response = reservations.stream()
+        List<ReservationResponseDto> response = reservations.stream()
             .map(this::mapToDTO)
             .collect(Collectors.toList());
         
@@ -140,10 +139,10 @@ public class ReservationController {
     }
 
     /**
-     * Mapper Reservation Entity vers ReservationResponse DTO
+     * Mapper Reservation Entity vers ReservationResponseDto DTO
      */
-    private ReservationResponse mapToDTO(Reservation reservation) {
-        return new ReservationResponse(
+    private ReservationResponseDto mapToDTO(Reservation reservation) {
+        return new ReservationResponseDto(
             reservation.getId(),
             reservation.getEnseignant().getFullName(),
             reservation.getSalle().getNumS(),
@@ -156,4 +155,3 @@ public class ReservationController {
         );
     }
 }
-

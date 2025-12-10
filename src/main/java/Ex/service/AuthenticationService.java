@@ -2,8 +2,8 @@ package Ex.service;
 
 import Ex.Role;
 import Ex.domain.UserRepository;
-import Ex.dtos.LoginUserDto;
-import Ex.dtos.RegisterUserDto;
+import Ex.dto.LoginUserDto;
+import Ex.dto.RegisterUserDto;
 import Ex.modele.User;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

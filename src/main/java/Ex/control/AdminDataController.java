@@ -4,8 +4,10 @@ import Ex.domain.*;
 import Ex.modele.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/admin/data")
 @PreAuthorize("hasRole('GESTIONNAIRE')")
+@Transactional(readOnly = true)
 public class AdminDataController {
 
     private final BatimentRepository batimentRepository;
@@ -43,6 +46,22 @@ public class AdminDataController {
     @GetMapping("/batiments")
     public ResponseEntity<List<Map<String, Object>>> getAllBatiments() {
         List<Batiment> batiments = batimentRepository.findAll();
+        
+        // Charger toutes les composantes une seule fois pour éviter les requêtes N+1
+        List<Composante> allComposantes = composantRepository.findAll();
+        
+        // Créer une map: codeB -> liste des acronymes de composantes
+        Map<String, List<String>> batimentToComposantes = new HashMap<>();
+        for (Composante c : allComposantes) {
+            if (c.getBatimentList() != null) {
+                for (Batiment b : c.getBatimentList()) {
+                    batimentToComposantes
+                            .computeIfAbsent(b.getCodeB(), k -> new ArrayList<>())
+                            .add(c.getAcronyme());
+                }
+            }
+        }
+        
         List<Map<String, Object>> result = batiments.stream().map(b -> {
             Map<String, Object> map = new HashMap<>();
             map.put("codeB", b.getCodeB());
@@ -55,6 +74,14 @@ public class AdminDataController {
                 campusMap.put("ville", b.getCampus().getVille());
                 map.put("campus", campusMap);
             }
+            // Ajouter la liste des composantes
+            List<String> acronymes = batimentToComposantes.getOrDefault(b.getCodeB(), new ArrayList<>());
+            List<Map<String, Object>> composantesList = acronymes.stream().map(acronyme -> {
+                Map<String, Object> compMap = new HashMap<>();
+                compMap.put("acronyme", acronyme);
+                return compMap;
+            }).collect(Collectors.toList());
+            map.put("composanteList", composantesList);
             return map;
         }).collect(Collectors.toList());
         return ResponseEntity.ok(result);
@@ -105,6 +132,15 @@ public class AdminDataController {
             map.put("acronyme", c.getAcronyme());
             map.put("nom", c.getNom());
             map.put("responsable", c.getResponsable());
+            // Ajouter la liste des bâtiments
+            if (c.getBatimentList() != null) {
+                List<Map<String, Object>> batimentsList = c.getBatimentList().stream().map(b -> {
+                    Map<String, Object> batMap = new HashMap<>();
+                    batMap.put("codeB", b.getCodeB());
+                    return batMap;
+                }).collect(Collectors.toList());
+                map.put("batimentList", batimentsList);
+            }
             return map;
         }).collect(Collectors.toList());
         return ResponseEntity.ok(result);

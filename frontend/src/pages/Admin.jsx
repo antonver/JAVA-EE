@@ -67,6 +67,21 @@ function Admin() {
   const [universiteDialog, setUniversiteDialog] = useState({ open: false, item: null });
   const [deleteDialog, setDeleteDialog] = useState({ open: false, type: '', item: null });
   const [success, setSuccess] = useState(null);
+
+  // Автоматическое скрытие сообщений
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => setSuccess(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
   
   // Проверка доступа
   if (user?.role !== 'GESTIONNAIRE') {
@@ -183,6 +198,8 @@ function Admin() {
 
   const handleDelete = async () => {
     const { type, item } = deleteDialog;
+    setError(null);
+    setSuccess(null);
     try {
       setLoading(true);
       switch (type) {
@@ -191,7 +208,7 @@ function Admin() {
           loadBatiments();
           break;
         case 'campus':
-          await api.delete(`/campus/${item.nomC}`);
+          await api.delete(`/campus-admin/${item.nomC}`);
           loadCampus();
           break;
         case 'salle':
@@ -212,41 +229,160 @@ function Admin() {
       setSuccess('Élément supprimé avec succès');
       setDeleteDialog({ open: false, type: '', item: null });
     } catch (err) {
-      console.error('Erreur:', err);
-      setError('Erreur lors de la suppression');
+      console.error('Erreur suppression:', err);
+      const errorMessage = err.response?.data?.message || err.response?.data || err.message || 'Erreur lors de la suppression';
+      setError(typeof errorMessage === 'string' ? errorMessage : 'Erreur lors de la suppression');
     } finally {
       setLoading(false);
     }
   };
 
+  // ============================================
+  // Styles - Premium Industrial Glass
+  // ============================================
+  const glassCardStyle = {
+    bgcolor: 'rgba(255, 255, 255, 0.02)',
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
+    border: '1px solid rgba(255, 255, 255, 0.06)',
+    boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 4px 24px rgba(0, 0, 0, 0.4)',
+  };
+
+  const actionButtonStyle = {
+    bgcolor: 'rgba(184, 255, 0, 0.12)',
+    color: '#b8ff00',
+    border: '1px solid rgba(184, 255, 0, 0.3)',
+    fontWeight: 600,
+    letterSpacing: '0.03em',
+    '&:hover': {
+      bgcolor: 'rgba(184, 255, 0, 0.2)',
+      borderColor: 'rgba(184, 255, 0, 0.5)',
+      boxShadow: '0 0 20px rgba(184, 255, 0, 0.15)',
+    },
+  };
+
+  const secondaryButtonStyle = {
+    color: 'rgba(255, 255, 255, 0.7)',
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    '&:hover': {
+      borderColor: 'rgba(184, 255, 0, 0.3)',
+      color: '#b8ff00',
+      bgcolor: 'rgba(184, 255, 0, 0.05)',
+    },
+  };
+
   return (
-    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Typography variant="h4" component="h1" fontWeight="bold">
-          Panneau d'Administration
-        </Typography>
-        <Chip label="GESTIONNAIRE" color="secondary" />
+    <Container maxWidth="xl" sx={{ mt: 2, mb: 4 }}>
+      {/* Header section */}
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        mb: 4,
+        flexWrap: 'wrap',
+        gap: 2,
+      }}>
+        <Box>
+          <Typography 
+            variant="h4" 
+            component="h1" 
+            sx={{ 
+              fontWeight: 600, 
+              letterSpacing: '0.02em',
+              color: 'rgba(255, 255, 255, 0.95)',
+              mb: 0.5,
+            }}
+          >
+            Panneau d'Administration
+          </Typography>
+          <Typography 
+            variant="body2" 
+            sx={{ color: 'rgba(255, 255, 255, 0.5)' }}
+          >
+            Gestion des entités du système universitaire
+          </Typography>
+        </Box>
+        <Chip 
+          label="GESTIONNAIRE" 
+          sx={{
+            bgcolor: 'rgba(255, 71, 87, 0.15)',
+            color: '#ff4757',
+            border: '1px solid rgba(255, 71, 87, 0.3)',
+            fontWeight: 600,
+            letterSpacing: '0.05em',
+            px: 1,
+          }}
+        />
       </Box>
 
+      {/* Alerts */}
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+        <Alert 
+          severity="error" 
+          sx={{ 
+            mb: 3,
+            bgcolor: 'rgba(255, 71, 87, 0.1)',
+            border: '1px solid rgba(255, 71, 87, 0.2)',
+            color: '#ff6b7a',
+            borderRadius: 2,
+          }} 
+          onClose={() => setError(null)}
+        >
           {error}
         </Alert>
       )}
 
       {success && (
-        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess(null)}>
+        <Alert 
+          severity="success" 
+          sx={{ 
+            mb: 3,
+            bgcolor: 'rgba(0, 255, 157, 0.1)',
+            border: '1px solid rgba(0, 255, 157, 0.2)',
+            color: '#33ffb1',
+            borderRadius: 2,
+          }} 
+          onClose={() => setSuccess(null)}
+        >
           {success}
         </Alert>
       )}
 
-      <Paper sx={{ width: '100%', mb: 2 }}>
+      {/* Tabs navigation */}
+      <Paper 
+        sx={{ 
+          width: '100%', 
+          mb: 3,
+          borderRadius: 2,
+          ...glassCardStyle,
+        }}
+      >
         <Tabs 
           value={currentTab} 
           onChange={handleTabChange} 
           aria-label="admin tabs"
           variant="scrollable"
           scrollButtons="auto"
+          sx={{
+            '& .MuiTabs-indicator': {
+              bgcolor: '#b8ff00',
+              height: 2,
+            },
+            '& .MuiTab-root': {
+              color: 'rgba(255, 255, 255, 0.5)',
+              fontWeight: 500,
+              letterSpacing: '0.02em',
+              textTransform: 'none',
+              minHeight: 56,
+              '&:hover': {
+                color: 'rgba(255, 255, 255, 0.8)',
+                bgcolor: 'rgba(255, 255, 255, 0.02)',
+              },
+              '&.Mui-selected': {
+                color: '#b8ff00',
+              },
+            },
+          }}
         >
           <Tab label="Bâtiments" />
           <Tab label="Campus" />
@@ -258,13 +394,20 @@ function Admin() {
 
       {/* Bâtiments Tab */}
       <TabPanel value={currentTab} index={0}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-          <Typography variant="h6">Gestion des Bâtiments</Typography>
-          <Box>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography 
+            variant="h6" 
+            sx={{ fontWeight: 600, letterSpacing: '0.01em', color: 'rgba(255, 255, 255, 0.9)' }}
+          >
+            Gestion des Bâtiments
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1 }}>
             <Button
               startIcon={<RefreshIcon />}
               onClick={loadBatiments}
-              sx={{ mr: 1 }}
+              disableRipple
+              variant="outlined"
+              sx={secondaryButtonStyle}
             >
               Actualiser
             </Button>
@@ -272,6 +415,8 @@ function Admin() {
               variant="contained"
               startIcon={<AddIcon />}
               onClick={() => setBatimentDialog({ open: true, item: null })}
+              disableRipple
+              sx={actionButtonStyle}
             >
               Ajouter
             </Button>
@@ -279,51 +424,80 @@ function Admin() {
         </Box>
         
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-            <CircularProgress />
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: 6 }}>
+            <CircularProgress sx={{ color: '#b8ff00' }} />
           </Box>
         ) : (
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} sx={{ borderRadius: 2, ...glassCardStyle }}>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Code</TableCell>
-                  <TableCell>Année Construction</TableCell>
-                  <TableCell>Latitude</TableCell>
-                  <TableCell>Longitude</TableCell>
-                  <TableCell>Campus</TableCell>
-                  <TableCell align="right">Actions</TableCell>
+                  <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Code</TableCell>
+                  <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Année Construction</TableCell>
+                  <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Latitude</TableCell>
+                  <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Longitude</TableCell>
+                  <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Campus</TableCell>
+                  <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Composantes</TableCell>
+                  <TableCell align="right" sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {batiments.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} align="center">
-                      <Typography color="text.secondary">Aucun bâtiment trouvé</Typography>
+                    <TableCell colSpan={7} align="center" sx={{ py: 6, borderBottom: 'none' }}>
+                      <Typography sx={{ color: 'rgba(255, 255, 255, 0.4)' }}>Aucun bâtiment trouvé</Typography>
                     </TableCell>
                   </TableRow>
                 ) : (
                   batiments.map((batiment, index) => (
-                    <TableRow key={batiment.codeB || `bat-${index}`}>
-                      <TableCell>{batiment.codeB || 'N/A'}</TableCell>
-                      <TableCell>{batiment.anneeC || 'N/A'}</TableCell>
-                      <TableCell>{batiment.latitude?.toFixed(6) || 'N/A'}</TableCell>
-                      <TableCell>{batiment.longitude?.toFixed(6) || 'N/A'}</TableCell>
-                      <TableCell>{batiment.campus?.nomC || 'N/A'}</TableCell>
+                    <TableRow 
+                      key={batiment.codeB || `bat-${index}`}
+                      sx={{ 
+                        '&:hover': { bgcolor: 'rgba(184, 255, 0, 0.02)' },
+                        '& td': { borderBottom: '1px solid rgba(255, 255, 255, 0.04)' },
+                      }}
+                    >
+                      <TableCell sx={{ color: '#b8ff00', fontWeight: 500 }}>{batiment.codeB || 'N/A'}</TableCell>
+                      <TableCell sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>{batiment.anneeC || 'N/A'}</TableCell>
+                      <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontFamily: '"JetBrains Mono", monospace', fontSize: '0.85rem' }}>{batiment.latitude?.toFixed(6) || 'N/A'}</TableCell>
+                      <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontFamily: '"JetBrains Mono", monospace', fontSize: '0.85rem' }}>{batiment.longitude?.toFixed(6) || 'N/A'}</TableCell>
+                      <TableCell sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>{batiment.campus?.nomC || 'N/A'}</TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                          {batiment.composanteList && batiment.composanteList.length > 0 ? (
+                            batiment.composanteList.map((comp) => (
+                              <Chip
+                                key={comp.acronyme}
+                                label={comp.acronyme}
+                                size="small"
+                                sx={{
+                                  bgcolor: 'rgba(184, 255, 0, 0.1)',
+                                  color: '#b8ff00',
+                                  border: '1px solid rgba(184, 255, 0, 0.3)',
+                                  fontWeight: 500,
+                                  fontSize: '0.7rem',
+                                }}
+                              />
+                            ))
+                          ) : (
+                            <Typography sx={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.8rem' }}>—</Typography>
+                          )}
+                        </Box>
+                      </TableCell>
                       <TableCell align="right">
                         <IconButton 
                           size="small" 
-                          color="primary"
                           onClick={() => setBatimentDialog({ open: true, item: batiment })}
+                          sx={{ color: 'rgba(255, 255, 255, 0.5)', '&:hover': { color: '#b8ff00', bgcolor: 'rgba(184, 255, 0, 0.1)' } }}
                         >
-                          <EditIcon />
+                          <EditIcon fontSize="small" />
                         </IconButton>
                         <IconButton 
                           size="small" 
-                          color="error"
                           onClick={() => setDeleteDialog({ open: true, type: 'batiment', item: batiment })}
+                          sx={{ color: 'rgba(255, 255, 255, 0.5)', '&:hover': { color: '#ff4757', bgcolor: 'rgba(255, 71, 87, 0.1)' } }}
                         >
-                          <DeleteIcon />
+                          <DeleteIcon fontSize="small" />
                         </IconButton>
                       </TableCell>
                     </TableRow>
@@ -337,68 +511,54 @@ function Admin() {
 
       {/* Campus Tab */}
       <TabPanel value={currentTab} index={1}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-          <Typography variant="h6">Gestion des Campus</Typography>
-          <Box>
-            <Button
-              startIcon={<RefreshIcon />}
-              onClick={loadCampus}
-              sx={{ mr: 1 }}
-            >
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, letterSpacing: '0.01em', color: 'rgba(255, 255, 255, 0.9)' }}>
+            Gestion des Campus
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button startIcon={<RefreshIcon />} onClick={loadCampus} disableRipple variant="outlined" sx={secondaryButtonStyle}>
               Actualiser
             </Button>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => setCampusDialog({ open: true, item: null })}
-            >
+            <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCampusDialog({ open: true, item: null })} disableRipple sx={actionButtonStyle}>
               Ajouter
             </Button>
           </Box>
         </Box>
         
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-            <CircularProgress />
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: 6 }}>
+            <CircularProgress sx={{ color: '#b8ff00' }} />
           </Box>
         ) : (
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} sx={{ borderRadius: 2, ...glassCardStyle }}>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Nom</TableCell>
-                  <TableCell>Ville</TableCell>
-                  <TableCell>Université</TableCell>
-                  <TableCell align="right">Actions</TableCell>
+                  <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Nom</TableCell>
+                  <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Ville</TableCell>
+                  <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Université</TableCell>
+                  <TableCell align="right" sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {campus.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} align="center">
-                      <Typography color="text.secondary">Aucun campus trouvé</Typography>
+                    <TableCell colSpan={4} align="center" sx={{ py: 6, borderBottom: 'none' }}>
+                      <Typography sx={{ color: 'rgba(255, 255, 255, 0.4)' }}>Aucun campus trouvé</Typography>
                     </TableCell>
                   </TableRow>
                 ) : (
                   campus.map((c, index) => (
-                    <TableRow key={c.nomC || `campus-${index}`}>
-                      <TableCell>{c.nomC || 'N/A'}</TableCell>
-                      <TableCell>{c.ville || 'N/A'}</TableCell>
-                      <TableCell>{c.universite?.nom || 'N/A'}</TableCell>
+                    <TableRow key={c.nomC || `campus-${index}`} sx={{ '&:hover': { bgcolor: 'rgba(184, 255, 0, 0.02)' }, '& td': { borderBottom: '1px solid rgba(255, 255, 255, 0.04)' } }}>
+                      <TableCell sx={{ color: '#b8ff00', fontWeight: 500 }}>{c.nomC || 'N/A'}</TableCell>
+                      <TableCell sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>{c.ville || 'N/A'}</TableCell>
+                      <TableCell sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>{c.universite?.nom || 'N/A'}</TableCell>
                       <TableCell align="right">
-                        <IconButton 
-                          size="small" 
-                          color="primary"
-                          onClick={() => setCampusDialog({ open: true, item: c })}
-                        >
-                          <EditIcon />
+                        <IconButton size="small" onClick={() => setCampusDialog({ open: true, item: c })} sx={{ color: 'rgba(255, 255, 255, 0.5)', '&:hover': { color: '#b8ff00', bgcolor: 'rgba(184, 255, 0, 0.1)' } }}>
+                          <EditIcon fontSize="small" />
                         </IconButton>
-                        <IconButton 
-                          size="small" 
-                          color="error"
-                          onClick={() => setDeleteDialog({ open: true, type: 'campus', item: c })}
-                        >
-                          <DeleteIcon />
+                        <IconButton size="small" onClick={() => setDeleteDialog({ open: true, type: 'campus', item: c })} sx={{ color: 'rgba(255, 255, 255, 0.5)', '&:hover': { color: '#ff4757', bgcolor: 'rgba(255, 71, 87, 0.1)' } }}>
+                          <DeleteIcon fontSize="small" />
                         </IconButton>
                       </TableCell>
                     </TableRow>
@@ -412,78 +572,71 @@ function Admin() {
 
       {/* Salles Tab */}
       <TabPanel value={currentTab} index={2}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-          <Typography variant="h6">Gestion des Salles</Typography>
-          <Box>
-            <Button
-              startIcon={<RefreshIcon />}
-              onClick={loadSalles}
-              sx={{ mr: 1 }}
-            >
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, letterSpacing: '0.01em', color: 'rgba(255, 255, 255, 0.9)' }}>
+            Gestion des Salles
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button startIcon={<RefreshIcon />} onClick={loadSalles} disableRipple variant="outlined" sx={secondaryButtonStyle}>
               Actualiser
             </Button>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => setSalleDialog({ open: true, item: null })}
-            >
+            <Button variant="contained" startIcon={<AddIcon />} onClick={() => setSalleDialog({ open: true, item: null })} disableRipple sx={actionButtonStyle}>
               Ajouter
             </Button>
           </Box>
         </Box>
         
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-            <CircularProgress />
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: 6 }}>
+            <CircularProgress sx={{ color: '#b8ff00' }} />
           </Box>
         ) : (
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} sx={{ borderRadius: 2, ...glassCardStyle }}>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Numéro</TableCell>
-                  <TableCell>Type</TableCell>
-                  <TableCell>Capacité</TableCell>
-                  <TableCell>Étage</TableCell>
-                  <TableCell>Accès PMR</TableCell>
-                  <TableCell align="right">Actions</TableCell>
+                  <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Numéro</TableCell>
+                  <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Bâtiment</TableCell>
+                  <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Type</TableCell>
+                  <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Capacité</TableCell>
+                  <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Étage</TableCell>
+                  <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Accès PMR</TableCell>
+                  <TableCell align="right" sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {salles.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} align="center">
-                      <Typography color="text.secondary">Aucune salle trouvée</Typography>
+                    <TableCell colSpan={7} align="center" sx={{ py: 6, borderBottom: 'none' }}>
+                      <Typography sx={{ color: 'rgba(255, 255, 255, 0.4)' }}>Aucune salle trouvée</Typography>
                     </TableCell>
                   </TableRow>
                 ) : (
                   salles.map((salle, index) => (
-                    <TableRow key={salle.numS || `salle-${index}`}>
-                      <TableCell>{salle.numS || 'N/A'}</TableCell>
-                      <TableCell>{salle.typeS || 'N/A'}</TableCell>
-                      <TableCell>{salle.capacite || 0}</TableCell>
-                      <TableCell>{salle.etage || 'N/A'}</TableCell>
+                    <TableRow key={salle.numS || `salle-${index}`} sx={{ '&:hover': { bgcolor: 'rgba(184, 255, 0, 0.02)' }, '& td': { borderBottom: '1px solid rgba(255, 255, 255, 0.04)' } }}>
+                      <TableCell sx={{ color: '#b8ff00', fontWeight: 500 }}>{salle.numS || 'N/A'}</TableCell>
+                      <TableCell sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>{salle.batiment?.codeB || 'N/A'}</TableCell>
+                      <TableCell sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>{salle.typeS || 'N/A'}</TableCell>
+                      <TableCell sx={{ color: 'rgba(255, 255, 255, 0.8)', fontFamily: '"JetBrains Mono", monospace' }}>{salle.capacite || 0}</TableCell>
+                      <TableCell sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>{salle.etage || 'N/A'}</TableCell>
                       <TableCell>
                         <Chip
                           label={salle.acces === 'oui' ? 'Oui' : 'Non'}
-                          color={salle.acces === 'oui' ? 'success' : 'default'}
                           size="small"
+                          sx={{
+                            bgcolor: salle.acces === 'oui' ? 'rgba(0, 255, 157, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                            color: salle.acces === 'oui' ? '#00ff9d' : 'rgba(255, 255, 255, 0.5)',
+                            border: salle.acces === 'oui' ? '1px solid rgba(0, 255, 157, 0.3)' : '1px solid rgba(255, 255, 255, 0.1)',
+                            fontWeight: 500,
+                          }}
                         />
                       </TableCell>
                       <TableCell align="right">
-                        <IconButton 
-                          size="small" 
-                          color="primary"
-                          onClick={() => setSalleDialog({ open: true, item: salle })}
-                        >
-                          <EditIcon />
+                        <IconButton size="small" onClick={() => setSalleDialog({ open: true, item: salle })} sx={{ color: 'rgba(255, 255, 255, 0.5)', '&:hover': { color: '#b8ff00', bgcolor: 'rgba(184, 255, 0, 0.1)' } }}>
+                          <EditIcon fontSize="small" />
                         </IconButton>
-                        <IconButton 
-                          size="small" 
-                          color="error"
-                          onClick={() => setDeleteDialog({ open: true, type: 'salle', item: salle })}
-                        >
-                          <DeleteIcon />
+                        <IconButton size="small" onClick={() => setDeleteDialog({ open: true, type: 'salle', item: salle })} sx={{ color: 'rgba(255, 255, 255, 0.5)', '&:hover': { color: '#ff4757', bgcolor: 'rgba(255, 71, 87, 0.1)' } }}>
+                          <DeleteIcon fontSize="small" />
                         </IconButton>
                       </TableCell>
                     </TableRow>
@@ -497,70 +650,66 @@ function Admin() {
 
       {/* Composantes Tab */}
       <TabPanel value={currentTab} index={3}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-          <Typography variant="h6">Gestion des Composantes</Typography>
-          <Box>
-            <Button
-              startIcon={<RefreshIcon />}
-              onClick={loadComposantes}
-              sx={{ mr: 1 }}
-            >
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, letterSpacing: '0.01em', color: 'rgba(255, 255, 255, 0.9)' }}>
+            Gestion des Composantes
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button startIcon={<RefreshIcon />} onClick={loadComposantes} disableRipple variant="outlined" sx={secondaryButtonStyle}>
               Actualiser
             </Button>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => setComposanteDialog({ open: true, item: null })}
-            >
+            <Button variant="contained" startIcon={<AddIcon />} onClick={() => setComposanteDialog({ open: true, item: null })} disableRipple sx={actionButtonStyle}>
               Ajouter
             </Button>
           </Box>
         </Box>
         
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-            <CircularProgress />
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: 6 }}>
+            <CircularProgress sx={{ color: '#b8ff00' }} />
           </Box>
         ) : (
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} sx={{ borderRadius: 2, ...glassCardStyle }}>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Acronyme</TableCell>
-                  <TableCell>Nom</TableCell>
-                  <TableCell>Responsable</TableCell>
-                  <TableCell align="right">Actions</TableCell>
+                  <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Acronyme</TableCell>
+                  <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Nom</TableCell>
+                  <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Responsable</TableCell>
+                  <TableCell align="right" sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {composantes.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} align="center">
-                      <Typography color="text.secondary">Aucune composante trouvée</Typography>
+                    <TableCell colSpan={4} align="center" sx={{ py: 6, borderBottom: 'none' }}>
+                      <Typography sx={{ color: 'rgba(255, 255, 255, 0.4)' }}>Aucune composante trouvée</Typography>
                     </TableCell>
                   </TableRow>
                 ) : (
                   composantes.map((comp, index) => (
-                    <TableRow key={comp.acronyme || `comp-${index}`}>
+                    <TableRow key={comp.acronyme || `comp-${index}`} sx={{ '&:hover': { bgcolor: 'rgba(184, 255, 0, 0.02)' }, '& td': { borderBottom: '1px solid rgba(255, 255, 255, 0.04)' } }}>
                       <TableCell>
-                        <Chip label={comp.acronyme || 'N/A'} size="small" color="primary" />
+                        <Chip 
+                          label={comp.acronyme || 'N/A'} 
+                          size="small" 
+                          sx={{ 
+                            bgcolor: 'rgba(184, 255, 0, 0.15)', 
+                            color: '#b8ff00', 
+                            border: '1px solid rgba(184, 255, 0, 0.3)',
+                            fontWeight: 600,
+                            letterSpacing: '0.03em',
+                          }} 
+                        />
                       </TableCell>
-                      <TableCell>{comp.nom || 'N/A'}</TableCell>
-                      <TableCell>{comp.responsable || 'N/A'}</TableCell>
+                      <TableCell sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>{comp.nom || 'N/A'}</TableCell>
+                      <TableCell sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>{comp.responsable || 'N/A'}</TableCell>
                       <TableCell align="right">
-                        <IconButton 
-                          size="small" 
-                          color="primary"
-                          onClick={() => setComposanteDialog({ open: true, item: comp })}
-                        >
-                          <EditIcon />
+                        <IconButton size="small" onClick={() => setComposanteDialog({ open: true, item: comp })} sx={{ color: 'rgba(255, 255, 255, 0.5)', '&:hover': { color: '#b8ff00', bgcolor: 'rgba(184, 255, 0, 0.1)' } }}>
+                          <EditIcon fontSize="small" />
                         </IconButton>
-                        <IconButton 
-                          size="small" 
-                          color="error"
-                          onClick={() => setDeleteDialog({ open: true, type: 'composante', item: comp })}
-                        >
-                          <DeleteIcon />
+                        <IconButton size="small" onClick={() => setDeleteDialog({ open: true, type: 'composante', item: comp })} sx={{ color: 'rgba(255, 255, 255, 0.5)', '&:hover': { color: '#ff4757', bgcolor: 'rgba(255, 71, 87, 0.1)' } }}>
+                          <DeleteIcon fontSize="small" />
                         </IconButton>
                       </TableCell>
                     </TableRow>
@@ -574,72 +723,68 @@ function Admin() {
 
       {/* Universités Tab */}
       <TabPanel value={currentTab} index={4}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-          <Typography variant="h6">Gestion des Universités</Typography>
-          <Box>
-            <Button
-              startIcon={<RefreshIcon />}
-              onClick={loadUniversites}
-              sx={{ mr: 1 }}
-            >
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, letterSpacing: '0.01em', color: 'rgba(255, 255, 255, 0.9)' }}>
+            Gestion des Universités
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button startIcon={<RefreshIcon />} onClick={loadUniversites} disableRipple variant="outlined" sx={secondaryButtonStyle}>
               Actualiser
             </Button>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => setUniversiteDialog({ open: true, item: null })}
-            >
+            <Button variant="contained" startIcon={<AddIcon />} onClick={() => setUniversiteDialog({ open: true, item: null })} disableRipple sx={actionButtonStyle}>
               Ajouter
             </Button>
           </Box>
         </Box>
         
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-            <CircularProgress />
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: 6 }}>
+            <CircularProgress sx={{ color: '#b8ff00' }} />
           </Box>
         ) : (
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} sx={{ borderRadius: 2, ...glassCardStyle }}>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Nom</TableCell>
-                  <TableCell>Acronyme</TableCell>
-                  <TableCell>Création</TableCell>
-                  <TableCell>Présidence</TableCell>
-                  <TableCell align="right">Actions</TableCell>
+                  <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Nom</TableCell>
+                  <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Acronyme</TableCell>
+                  <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Création</TableCell>
+                  <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Présidence</TableCell>
+                  <TableCell align="right" sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {universites.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} align="center">
-                      <Typography color="text.secondary">Aucune université trouvée</Typography>
+                    <TableCell colSpan={5} align="center" sx={{ py: 6, borderBottom: 'none' }}>
+                      <Typography sx={{ color: 'rgba(255, 255, 255, 0.4)' }}>Aucune université trouvée</Typography>
                     </TableCell>
                   </TableRow>
                 ) : (
                   universites.map((univ, index) => (
-                    <TableRow key={univ.nom || `univ-${index}`}>
-                      <TableCell>{univ.nom || 'N/A'}</TableCell>
+                    <TableRow key={univ.nom || `univ-${index}`} sx={{ '&:hover': { bgcolor: 'rgba(184, 255, 0, 0.02)' }, '& td': { borderBottom: '1px solid rgba(255, 255, 255, 0.04)' } }}>
+                      <TableCell sx={{ color: '#b8ff00', fontWeight: 500 }}>{univ.nom || 'N/A'}</TableCell>
                       <TableCell>
-                        <Chip label={univ.acronyme || 'N/A'} size="small" color="secondary" />
+                        <Chip 
+                          label={univ.acronyme || 'N/A'} 
+                          size="small" 
+                          sx={{ 
+                            bgcolor: 'rgba(0, 212, 255, 0.15)', 
+                            color: '#00d4ff', 
+                            border: '1px solid rgba(0, 212, 255, 0.3)',
+                            fontWeight: 600,
+                            letterSpacing: '0.03em',
+                          }} 
+                        />
                       </TableCell>
-                      <TableCell>{univ.creation || 'N/A'}</TableCell>
-                      <TableCell>{univ.presidence || 'N/A'}</TableCell>
+                      <TableCell sx={{ color: 'rgba(255, 255, 255, 0.8)', fontFamily: '"JetBrains Mono", monospace' }}>{univ.creation || 'N/A'}</TableCell>
+                      <TableCell sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>{univ.presidence || 'N/A'}</TableCell>
                       <TableCell align="right">
-                        <IconButton 
-                          size="small" 
-                          color="primary"
-                          onClick={() => setUniversiteDialog({ open: true, item: univ })}
-                        >
-                          <EditIcon />
+                        <IconButton size="small" onClick={() => setUniversiteDialog({ open: true, item: univ })} sx={{ color: 'rgba(255, 255, 255, 0.5)', '&:hover': { color: '#b8ff00', bgcolor: 'rgba(184, 255, 0, 0.1)' } }}>
+                          <EditIcon fontSize="small" />
                         </IconButton>
-                        <IconButton 
-                          size="small" 
-                          color="error"
-                          onClick={() => setDeleteDialog({ open: true, type: 'universite', item: univ })}
-                        >
-                          <DeleteIcon />
+                        <IconButton size="small" onClick={() => setDeleteDialog({ open: true, type: 'universite', item: univ })} sx={{ color: 'rgba(255, 255, 255, 0.5)', '&:hover': { color: '#ff4757', bgcolor: 'rgba(255, 71, 87, 0.1)' } }}>
+                          <DeleteIcon fontSize="small" />
                         </IconButton>
                       </TableCell>
                     </TableRow>
@@ -702,22 +847,71 @@ function Admin() {
         }}
       />
 
-      {/* Delete Confirmation Dialog */}
+      {/* Delete Confirmation Dialog - Glass style */}
       <Dialog
         open={deleteDialog.open}
         onClose={() => setDeleteDialog({ open: false, type: '', item: null })}
+        PaperProps={{
+          sx: {
+            bgcolor: 'rgba(10, 10, 10, 0.95)',
+            backdropFilter: 'blur(30px)',
+            border: '1px solid rgba(255, 71, 87, 0.2)',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+            borderRadius: 3,
+            minWidth: 400,
+          },
+        }}
       >
-        <DialogTitle>Confirmer la suppression</DialogTitle>
-        <DialogContent>
-          <Alert severity="warning">
+        <DialogTitle 
+          sx={{ 
+            borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+            fontWeight: 600,
+            letterSpacing: '0.01em',
+            color: '#ff4757',
+          }}
+        >
+          Confirmer la suppression
+        </DialogTitle>
+        <DialogContent sx={{ pt: 3 }}>
+          <Alert 
+            severity="warning"
+            sx={{
+              bgcolor: 'rgba(255, 184, 0, 0.1)',
+              border: '1px solid rgba(255, 184, 0, 0.2)',
+              color: '#ffc433',
+              borderRadius: 2,
+            }}
+          >
             Êtes-vous sûr de vouloir supprimer cet élément ? Cette action est irréversible.
           </Alert>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialog({ open: false, type: '', item: null })}>
+        <DialogActions sx={{ p: 3, pt: 1, borderTop: '1px solid rgba(255, 255, 255, 0.06)' }}>
+          <Button 
+            onClick={() => setDeleteDialog({ open: false, type: '', item: null })}
+            disableRipple
+            sx={{
+              color: 'rgba(255, 255, 255, 0.6)',
+              '&:hover': { color: 'rgba(255, 255, 255, 0.9)', bgcolor: 'rgba(255, 255, 255, 0.05)' },
+            }}
+          >
             Annuler
           </Button>
-          <Button onClick={handleDelete} color="error" variant="contained">
+          <Button 
+            onClick={handleDelete} 
+            variant="contained"
+            disableRipple
+            sx={{
+              bgcolor: 'rgba(255, 71, 87, 0.15)',
+              color: '#ff4757',
+              border: '1px solid rgba(255, 71, 87, 0.3)',
+              fontWeight: 600,
+              '&:hover': {
+                bgcolor: 'rgba(255, 71, 87, 0.25)',
+                borderColor: 'rgba(255, 71, 87, 0.5)',
+                boxShadow: '0 0 20px rgba(255, 71, 87, 0.2)',
+              },
+            }}
+          >
             Supprimer
           </Button>
         </DialogActions>

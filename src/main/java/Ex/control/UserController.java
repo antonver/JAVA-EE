@@ -1,7 +1,7 @@
 package Ex.control;
 
-import Ex.dto.UpdateProfileRequest;
-import Ex.dto.UserProfileResponse;
+import Ex.dto.UpdateProfileRequestDto;
+import Ex.dto.UserProfileResponseDto;
 import Ex.modele.User;
 import Ex.domain.UserRepository;
 import Ex.service.JwtService;
@@ -32,11 +32,11 @@ public class UserController {
      */
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<UserProfileResponse> getCurrentUser() {
+    public ResponseEntity<UserProfileResponseDto> getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
         
-        UserProfileResponse response = new UserProfileResponse(
+        UserProfileResponseDto response = new UserProfileResponseDto(
             user.getId(),
             user.getEmail(),
             user.getFullName(),
@@ -52,7 +52,7 @@ public class UserController {
      */
     @PatchMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> updateCurrentUser(@Valid @RequestBody UpdateProfileRequest request) {
+    public ResponseEntity<?> updateCurrentUser(@Valid @RequestBody UpdateProfileRequestDto request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
         
@@ -64,9 +64,9 @@ public class UserController {
         String newToken = jwtService.generateToken(user);
         
         // Возвращаем новый токен и обновленную информацию
-        return ResponseEntity.ok(new UpdateProfileResponse(
+        return ResponseEntity.ok(new UpdateProfileResponseDto(
             newToken,
-            new UserProfileResponse(
+            new UserProfileResponseDto(
                 user.getId(),
                 user.getEmail(),
                 user.getFullName(),
@@ -79,8 +79,8 @@ public class UserController {
      * DTO для ответа после обновления профиля
      * Включает новый JWT токен с обновленными данными
      */
-    public record UpdateProfileResponse(
+    public record UpdateProfileResponseDto(
         String token,
-        UserProfileResponse user
+        UserProfileResponseDto user
     ) {}
 }

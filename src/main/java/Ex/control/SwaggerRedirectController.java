@@ -12,4 +12,3 @@ public class SwaggerRedirectController {
         return new RedirectView("/swagger-ui/index.html");
     }
 }
-

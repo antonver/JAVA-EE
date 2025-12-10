@@ -19,7 +19,7 @@ public class UserService {
         List<User> users = new ArrayList<>();
 
         userRepository.findAll().forEach(users::add);
-
+        
         return users;
     }
 }

@@ -1,0 +1,12 @@
+# Backend
+target/
+*.class
+*.jar
+*.log
+.idea/
+*.iml
+
+# Frontend (отдельный .dockerignore в папке frontend)
+frontend/node_modules/
+frontend/dist/
+
