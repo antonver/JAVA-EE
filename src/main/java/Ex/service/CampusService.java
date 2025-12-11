@@ -33,16 +33,18 @@ public class CampusService  implements ICampusService {
     }
 
     public void campusEtBatiments() {
-        Iterable<String[]> e = showsEntities();
+        List<String[]> results = cr.campusEtCodeB();
+        
         System.out.println("les campus avec leurs batiments (nomC) :");
-        if (StreamSupport.stream(e.spliterator(), false).count() != 0) {
-            for (String[] s : e) {
-                for (String entry : s) {
-                    System.out.print(entry + " ");
-                }
-                System.out.println("");
-            }
-        } else System.out.println("pas grand chose dans la base");
+        
+        if (results.isEmpty()) {
+            System.out.println("pas grand chose dans la base");
+            return;
+        }
+        
+        for (String[] row : results) {
+            System.out.println(String.join(" ", row));
+        }
     }
 
     @Override

@@ -69,7 +69,6 @@ public class SecurityConfiguration {
                         // Доступ к админским эндпоинтам (GESTIONNAIRE)
                         .requestMatchers("/users/**").hasRole("GESTIONNAIRE")
                         .requestMatchers("/campus/**").hasRole("GESTIONNAIRE")
-                        .requestMatchers("/campus-admin/**").hasRole("GESTIONNAIRE")
                         .requestMatchers("/composantes/**").hasRole("GESTIONNAIRE")
                         .requestMatchers("/universites/**").hasRole("GESTIONNAIRE")
                         .requestMatchers("/reservations/**").hasAnyRole("GESTIONNAIRE", "ENSEIGNANT")

@@ -332,8 +332,8 @@ const MapView = () => {
           {batiments
             .filter(batiment => batiment.latitude && batiment.longitude)
             .map((batiment, index) => {
-              // Извлекаем ID из _links.self.href
-              const batimentId = batiment._links?.self?.href?.split('/').pop() || index;
+              // L'ID du bâtiment est le codeB
+              const batimentId = batiment.codeB || index;
               const selected = isSelected(batimentId);
               
               // Icône personnalisée pour les bâtiments sélectionnés

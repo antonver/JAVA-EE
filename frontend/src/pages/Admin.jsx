@@ -67,21 +67,6 @@ function Admin() {
   const [universiteDialog, setUniversiteDialog] = useState({ open: false, item: null });
   const [deleteDialog, setDeleteDialog] = useState({ open: false, type: '', item: null });
   const [success, setSuccess] = useState(null);
-
-  // Автоматическое скрытие сообщений
-  useEffect(() => {
-    if (success) {
-      const timer = setTimeout(() => setSuccess(null), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [success]);
-
-  useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => setError(null), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [error]);
   
   // Проверка доступа
   if (user?.role !== 'GESTIONNAIRE') {
@@ -198,8 +183,6 @@ function Admin() {
 
   const handleDelete = async () => {
     const { type, item } = deleteDialog;
-    setError(null);
-    setSuccess(null);
     try {
       setLoading(true);
       switch (type) {
@@ -208,7 +191,7 @@ function Admin() {
           loadBatiments();
           break;
         case 'campus':
-          await api.delete(`/campus-admin/${item.nomC}`);
+          await api.delete(`/campus/${item.nomC}`);
           loadCampus();
           break;
         case 'salle':
@@ -229,9 +212,8 @@ function Admin() {
       setSuccess('Élément supprimé avec succès');
       setDeleteDialog({ open: false, type: '', item: null });
     } catch (err) {
-      console.error('Erreur suppression:', err);
-      const errorMessage = err.response?.data?.message || err.response?.data || err.message || 'Erreur lors de la suppression';
-      setError(typeof errorMessage === 'string' ? errorMessage : 'Erreur lors de la suppression');
+      console.error('Erreur:', err);
+      setError('Erreur lors de la suppression');
     } finally {
       setLoading(false);
     }
@@ -437,14 +419,13 @@ function Admin() {
                   <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Latitude</TableCell>
                   <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Longitude</TableCell>
                   <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Campus</TableCell>
-                  <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Composantes</TableCell>
                   <TableCell align="right" sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {batiments.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} align="center" sx={{ py: 6, borderBottom: 'none' }}>
+                    <TableCell colSpan={6} align="center" sx={{ py: 6, borderBottom: 'none' }}>
                       <Typography sx={{ color: 'rgba(255, 255, 255, 0.4)' }}>Aucun bâtiment trouvé</Typography>
                     </TableCell>
                   </TableRow>
@@ -462,28 +443,6 @@ function Admin() {
                       <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontFamily: '"JetBrains Mono", monospace', fontSize: '0.85rem' }}>{batiment.latitude?.toFixed(6) || 'N/A'}</TableCell>
                       <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontFamily: '"JetBrains Mono", monospace', fontSize: '0.85rem' }}>{batiment.longitude?.toFixed(6) || 'N/A'}</TableCell>
                       <TableCell sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>{batiment.campus?.nomC || 'N/A'}</TableCell>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                          {batiment.composanteList && batiment.composanteList.length > 0 ? (
-                            batiment.composanteList.map((comp) => (
-                              <Chip
-                                key={comp.acronyme}
-                                label={comp.acronyme}
-                                size="small"
-                                sx={{
-                                  bgcolor: 'rgba(184, 255, 0, 0.1)',
-                                  color: '#b8ff00',
-                                  border: '1px solid rgba(184, 255, 0, 0.3)',
-                                  fontWeight: 500,
-                                  fontSize: '0.7rem',
-                                }}
-                              />
-                            ))
-                          ) : (
-                            <Typography sx={{ color: 'rgba(255, 255, 255, 0.3)', fontSize: '0.8rem' }}>—</Typography>
-                          )}
-                        </Box>
-                      </TableCell>
                       <TableCell align="right">
                         <IconButton 
                           size="small" 
@@ -596,7 +555,6 @@ function Admin() {
               <TableHead>
                 <TableRow>
                   <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Numéro</TableCell>
-                  <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Bâtiment</TableCell>
                   <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Type</TableCell>
                   <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Capacité</TableCell>
                   <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Étage</TableCell>
@@ -607,7 +565,7 @@ function Admin() {
               <TableBody>
                 {salles.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} align="center" sx={{ py: 6, borderBottom: 'none' }}>
+                    <TableCell colSpan={6} align="center" sx={{ py: 6, borderBottom: 'none' }}>
                       <Typography sx={{ color: 'rgba(255, 255, 255, 0.4)' }}>Aucune salle trouvée</Typography>
                     </TableCell>
                   </TableRow>
@@ -615,7 +573,6 @@ function Admin() {
                   salles.map((salle, index) => (
                     <TableRow key={salle.numS || `salle-${index}`} sx={{ '&:hover': { bgcolor: 'rgba(184, 255, 0, 0.02)' }, '& td': { borderBottom: '1px solid rgba(255, 255, 255, 0.04)' } }}>
                       <TableCell sx={{ color: '#b8ff00', fontWeight: 500 }}>{salle.numS || 'N/A'}</TableCell>
-                      <TableCell sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>{salle.batiment?.codeB || 'N/A'}</TableCell>
                       <TableCell sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>{salle.typeS || 'N/A'}</TableCell>
                       <TableCell sx={{ color: 'rgba(255, 255, 255, 0.8)', fontFamily: '"JetBrains Mono", monospace' }}>{salle.capacite || 0}</TableCell>
                       <TableCell sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>{salle.etage || 'N/A'}</TableCell>

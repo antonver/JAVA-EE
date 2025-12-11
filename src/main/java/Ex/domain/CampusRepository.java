@@ -1,20 +1,16 @@
 package Ex.domain;
 
 import java.util.List;
-import java.util.Optional;
 
-import Ex.modele.Batiment;
 import Ex.modele.Salle;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.stereotype.Repository;
 
 import Ex.modele.Campus;
 
 
 @Repository
-@RepositoryRestResource(path = "campus")
 public interface CampusRepository extends JpaRepository<Campus, String> {
 
 	List<Campus> findByVille(String ville);

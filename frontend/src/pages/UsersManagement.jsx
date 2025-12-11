@@ -196,8 +196,7 @@ function UsersManagement() {
                 </TableRow>
               ) : (
                 users.map((user, index) => {
-                  // Extraire l'ID depuis _links.self.href si id n'est pas disponible
-                  const userId = user.id || user._links?.self?.href?.split('/').pop() || index;
+                  const userId = user.id || index;
                   const userRole = user.role?.name || user.role || 'N/A';
                   
                   return (

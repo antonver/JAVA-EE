@@ -7,11 +7,9 @@ import Ex.modele.TypeSalle;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import java.util.List;
 
-@RepositoryRestResource(collectionResourceRel = "salles", path = "salles")
 public interface SalleRepository extends JpaRepository<Salle, String> {
 //   1. il faut écrir le premiere methode
 
@@ -21,7 +19,7 @@ public interface SalleRepository extends JpaRepository<Salle, String> {
 //3. retourner les salles qui sont localis´ees dans un bˆatiment dont le code est pass´e en param`etre
     @Query("SELECT s FROM Salle s WHERE s.numS = :numS")
     List<Salle> retournerSalleParNumDeBat(@Param("numS") String numS);
-//4. retourner toutes les salles d’un campus dont le nom est `a pr´eciser en param`etre
+//4. retourner toutes les salles d'un campus dont le nom est `a pr´eciser en param`etre
     @Query("""
 SELECT s FROM Salle s
  JOIN s.batiment
@@ -41,5 +39,3 @@ SELECT COUNT(s) FROM Salle s WHERE s.typeS = :typeS
 """)
     int retournerNombreSallesParType(@Param("typeS") TypeSalle nums);
 }
-
-

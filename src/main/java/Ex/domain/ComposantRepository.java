@@ -1,16 +1,12 @@
 package Ex.domain;
 
 import Ex.modele.Composante;
-import Ex.modele.Salle;
 import Ex.modele.TypeSalle;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import java.util.List;
 
-@RepositoryRestResource(path = "composantes")
 public interface ComposantRepository extends JpaRepository<Composante, String> {
 
     @Query(
