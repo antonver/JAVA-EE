@@ -3,6 +3,7 @@ package Ex.modele;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.List;
 
@@ -30,9 +31,11 @@ public class Batiment {
 	private Campus campus;
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="batiment", cascade = CascadeType.REMOVE)
+	@BatchSize(size = 20)
 	private List<Salle> salleList;
 
 	@ManyToMany(mappedBy = "batimentList")
+	@BatchSize(size = 20)
 	private List<Composante> composanteList;
 	
 	public Batiment() {} 

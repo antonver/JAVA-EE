@@ -2,6 +2,7 @@
 package Ex.modele;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class Universite {
             fetch = FetchType.LAZY,  mappedBy="universite",
             cascade = CascadeType.REMOVE
     )
+    @BatchSize(size = 20)
     private List<Campus> campusList;
 
     public Universite() {}

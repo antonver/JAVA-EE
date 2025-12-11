@@ -1,6 +1,7 @@
 package Ex.modele;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,7 @@ public class Campus {
 	private String ville;
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="campus", cascade = CascadeType.REMOVE)
+	@BatchSize(size = 20)
 	private List<Batiment> batiments;
 
 	@ManyToOne(fetch = FetchType.LAZY)

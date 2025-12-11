@@ -2,6 +2,7 @@ package Ex.modele;
 
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.List;
 
@@ -20,6 +21,7 @@ public class Composante {
             joinColumns = @JoinColumn(name="team"),
             inverseJoinColumns = @JoinColumn(name="building")
     )
+    @BatchSize(size = 20)
     private List<Batiment> batimentList;
 
     public Composante() {}
