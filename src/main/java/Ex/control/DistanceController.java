@@ -12,10 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
-/**
- * Contrôleur REST pour le calcul de distances entre bâtiments
- * Utilise SloppyMath d'Apache Lucene pour les calculs géographiques
- */
 @RestController
 @RequestMapping("/distance")
 public class DistanceController {
@@ -23,15 +19,11 @@ public class DistanceController {
     @Autowired
     private BatimentRepository batimentRepository;
 
-    /**
-     * Calculer la distance entre deux bâtiments
-     */
     @GetMapping("/between")
     public ResponseEntity<?> getDistanceBetweenBuildings(
             @RequestParam String code1,
             @RequestParam String code2) {
         
-        // Récupérer les bâtiments depuis la BD
         Optional<Batiment> bat1Opt = batimentRepository.findById(code1);
         Optional<Batiment> bat2Opt = batimentRepository.findById(code2);
 
@@ -42,13 +34,10 @@ public class DistanceController {
         Batiment bat1 = bat1Opt.get();
         Batiment bat2 = bat2Opt.get();
 
-        // Vérifier les coordonnées
         if (bat1.getLatitude() == null || bat1.getLongitude() == null ||
             bat2.getLatitude() == null || bat2.getLongitude() == null) {
             return ResponseEntity.badRequest().body("Coordonnées GPS manquantes");
         }
-
-        // Calculer la distance avec SloppyMath
         double distanceMeters = SloppyMath.haversinMeters(
             bat1.getLatitude(), bat1.getLongitude(),
             bat2.getLatitude(), bat2.getLongitude()
@@ -65,9 +54,7 @@ public class DistanceController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Calculer la distance avec des coordonnées GPS directes
-     */
+    
     @GetMapping("/calculate")
     public ResponseEntity<DistanceInfoDto> calculateDistance(
             @RequestParam Double lat1,
@@ -81,18 +68,12 @@ public class DistanceController {
         return ResponseEntity.ok(response);
     }
 
-    // ===== Méthodes de mapping (BD -> DTO) =====
-
-    /**
-     * Mapper une entité Batiment vers un DTO BatimentInfoDto
-     * Séparation entre modèle BD et contrat API
-     */
     private BatimentInfoDto mapToDTO(Batiment batiment) {
         return new BatimentInfoDto(
-            batiment.getCodeB(),
-            batiment.getLatitude(),
-            batiment.getLongitude(),
-            batiment.getCampus() != null ? batiment.getCampus().getNomC() : null
+                batiment.getCodeB(),
+                batiment.getLatitude(),
+                batiment.getLongitude(),
+                batiment.getCampus() != null ? batiment.getCampus().getNomC() : null
         );
     }
 

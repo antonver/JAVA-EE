@@ -4,7 +4,7 @@ package Ex.dto;
  * Informations sur un bâtiment (réponse API)
  */
 public record BatimentInfoDto(
-    String code,
+    String codeB,
     Double latitude,
     Double longitude,
     String campus

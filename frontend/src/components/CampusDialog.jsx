@@ -60,15 +60,15 @@ function CampusDialog({ open, onClose, campus, onSave }) {
       const data = {
         nomC: formData.nomC,
         ville: formData.ville,
-        universite: formData.universiteNom ? `/universites/${formData.universiteNom}` : null
+        universiteNom: formData.universiteNom || null
       };
 
       if (campus) {
         // Update
-        await api.patch(`/campus/${campus.nomC}`, data);
+        await api.patch(`/campus-admin/${campus.nomC}`, data);
       } else {
         // Create
-        await api.post('/campus', data);
+        await api.post('/campus-admin', data);
       }
       
       onSave();

@@ -1,6 +1,7 @@
 package Ex.control;
 
 import Ex.domain.*;
+import Ex.dto.BatimentRequestDto;
 import Ex.modele.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -8,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Contrôleur REST pour la gestion des Bâtiments
@@ -41,25 +41,19 @@ public class BatimentController {
      */
     @PostMapping
     @Transactional
-    public ResponseEntity<?> createBatiment(@RequestBody Map<String, Object> request) {
-        String codeB = (String) request.get("codeB");
-        Integer anneeC = request.get("anneeC") != null ? ((Number) request.get("anneeC")).intValue() : null;
-        Double latitude = request.get("latitude") != null ? ((Number) request.get("latitude")).doubleValue() : null;
-        Double longitude = request.get("longitude") != null ? ((Number) request.get("longitude")).doubleValue() : null;
-        String campusNomC = (String) request.get("campusNomC");
-
-        if (batimentRepository.existsById(codeB)) {
+    public ResponseEntity<?> createBatiment(@RequestBody BatimentRequestDto request) {
+        if (batimentRepository.existsById(request.codeB())) {
             return ResponseEntity.badRequest().body("Un bâtiment avec ce code existe déjà");
         }
 
         Batiment batiment = new Batiment();
-        batiment.setCodeB(codeB);
-        if (anneeC != null) batiment.setAnneeC(anneeC);
-        batiment.setLatitude(latitude);
-        batiment.setLongitude(longitude);
+        batiment.setCodeB(request.codeB());
+        if (request.anneeC() != null) batiment.setAnneeC(request.anneeC());
+        batiment.setLatitude(request.latitude());
+        batiment.setLongitude(request.longitude());
 
-        if (campusNomC != null && !campusNomC.isEmpty()) {
-            Campus campus = campusRepository.findById(campusNomC).orElse(null);
+        if (request.campusNomC() != null && !request.campusNomC().isEmpty()) {
+            Campus campus = campusRepository.findById(request.campusNomC()).orElse(null);
             batiment.setCampus(campus);
         }
 
@@ -72,23 +66,22 @@ public class BatimentController {
      */
     @PatchMapping("/{codeB}")
     @Transactional
-    public ResponseEntity<?> updateBatiment(@PathVariable String codeB, @RequestBody Map<String, Object> request) {
+    public ResponseEntity<?> updateBatiment(@PathVariable String codeB, @RequestBody BatimentRequestDto request) {
         Batiment batiment = batimentRepository.findById(codeB)
                 .orElseThrow(() -> new RuntimeException("Bâtiment non trouvé"));
 
-        if (request.containsKey("anneeC") && request.get("anneeC") != null) {
-            batiment.setAnneeC(((Number) request.get("anneeC")).intValue());
+        if (request.anneeC() != null) {
+            batiment.setAnneeC(request.anneeC());
         }
-        if (request.containsKey("latitude")) {
-            batiment.setLatitude(request.get("latitude") != null ? ((Number) request.get("latitude")).doubleValue() : null);
+        if (request.latitude() != null) {
+            batiment.setLatitude(request.latitude());
         }
-        if (request.containsKey("longitude")) {
-            batiment.setLongitude(request.get("longitude") != null ? ((Number) request.get("longitude")).doubleValue() : null);
+        if (request.longitude() != null) {
+            batiment.setLongitude(request.longitude());
         }
-        if (request.containsKey("campusNomC")) {
-            String campusNomC = (String) request.get("campusNomC");
-            if (campusNomC != null && !campusNomC.isEmpty()) {
-                Campus campus = campusRepository.findById(campusNomC).orElse(null);
+        if (request.campusNomC() != null) {
+            if (!request.campusNomC().isEmpty()) {
+                Campus campus = campusRepository.findById(request.campusNomC()).orElse(null);
                 batiment.setCampus(campus);
             } else {
                 batiment.setCampus(null);
@@ -110,18 +103,17 @@ public class BatimentController {
             return ResponseEntity.notFound().build();
         }
 
-        // 1. Récupérer toutes les salles du bâtiment
+
         List<Salle> salles = salleRepository.findAll().stream()
                 .filter(s -> s.getBatiment() != null && s.getBatiment().getCodeB().equals(codeB))
                 .toList();
 
-        // 2. Supprimer toutes les réservations liées à ces salles
+
         for (Salle salle : salles) {
             List<Reservation> reservations = reservationRepository.findBySalle(salle);
             reservationRepository.deleteAll(reservations);
         }
 
-        // 3. Supprimer les liens avec les composantes (table Exploite)
         List<Composante> allComposantes = composantRepository.findAll();
         for (Composante composante : allComposantes) {
             if (composante.getBatimentList() != null) {
@@ -130,14 +122,11 @@ public class BatimentController {
             }
         }
 
-        // 4. Supprimer les salles
+
         salleRepository.deleteAll(salles);
 
-        // 5. Supprimer le bâtiment
         batimentRepository.delete(batiment);
 
         return ResponseEntity.ok("Bâtiment supprimé avec " + salles.size() + " salle(s)");
     }
 }
-
-

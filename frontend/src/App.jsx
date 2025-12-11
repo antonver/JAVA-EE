@@ -12,26 +12,46 @@ import UsersManagement from './pages/UsersManagement';
 import Layout from './components/Layout';
 import './App.css';
 
-// Создаем тему MUI
+// Создаем тему MUI (темная, соответствует index.css)
 const theme = createTheme({
   palette: {
+    mode: 'dark',
     primary: {
-      main: '#1976d2',
+      main: '#b8ff00', // Acid Lime из index.css
     },
     secondary: {
-      main: '#dc004e',
+      main: '#00d4ff',
+    },
+    background: {
+      default: '#050505', // --bg-onyx
+      paper: '#111111', // --bg-graphite
     },
   },
   typography: {
     fontFamily: [
+      'Outfit',
       '-apple-system',
       'BlinkMacSystemFont',
       '"Segoe UI"',
       'Roboto',
-      '"Helvetica Neue"',
-      'Arial',
       'sans-serif',
     ].join(','),
+  },
+  components: {
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundImage: 'none',
+        },
+      },
+    },
+    MuiTableCell: {
+      styleOverrides: {
+        root: {
+          borderColor: 'rgba(255, 255, 255, 0.08)',
+        },
+      },
+    },
   },
 });
 

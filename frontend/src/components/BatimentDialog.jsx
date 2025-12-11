@@ -68,7 +68,7 @@ function BatimentDialog({ open, onClose, batiment, onSave }) {
         anneeC: parseInt(formData.anneeC),
         latitude: parseFloat(formData.latitude),
         longitude: parseFloat(formData.longitude),
-        campus: formData.campusNomC ? `/campus/${formData.campusNomC}` : null
+        campusNomC: formData.campusNomC || null
       };
 
       if (batiment) {

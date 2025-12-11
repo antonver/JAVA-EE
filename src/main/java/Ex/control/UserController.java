@@ -12,9 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Контроллер для управления профилем пользователя
- */
+
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -27,9 +25,6 @@ public class UserController {
         this.jwtService = jwtService;
     }
 
-    /**
-     * Получить информацию о текущем пользователе
-     */
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserProfileResponseDto> getCurrentUser() {
@@ -46,24 +41,17 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Обновить профиль текущего пользователя
-     * Пользователь может обновлять только свой профиль
-     */
     @PatchMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> updateCurrentUser(@Valid @RequestBody UpdateProfileRequestDto request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User) authentication.getPrincipal();
         
-        // Обновляем только fullName
         user.setFullName(request.fullName());
         userRepository.save(user);
-        
-        // Генерируем новый JWT токен с обновленными данными
+
         String newToken = jwtService.generateToken(user);
         
-        // Возвращаем новый токен и обновленную информацию
         return ResponseEntity.ok(new UpdateProfileResponseDto(
             newToken,
             new UserProfileResponseDto(
@@ -75,10 +63,7 @@ public class UserController {
         ));
     }
     
-    /**
-     * DTO для ответа после обновления профиля
-     * Включает новый JWT токен с обновленными данными
-     */
+
     public record UpdateProfileResponseDto(
         String token,
         UserProfileResponseDto user

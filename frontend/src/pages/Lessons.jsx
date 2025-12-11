@@ -27,7 +27,7 @@ import {
   Book as BookIcon,
   Clear as ClearIcon
 } from '@mui/icons-material';
-import { createReservation, getMesReservations, deleteReservation, getSalles } from '../services/api';
+import { createReservation, getMesReservations, deleteReservation, getSalles, getComposantes } from '../services/api';
 
 function Lessons() {
   const [reservations, setReservations] = useState([]);
@@ -46,6 +46,10 @@ function Lessons() {
   const [salles, setSalles] = useState([]);
   const [loadingSalles, setLoadingSalles] = useState(false);
   const [selectedSalle, setSelectedSalle] = useState(null);
+  
+  // Для autocomplete composantes (matière)
+  const [composantes, setComposantes] = useState([]);
+  const [loadingComposantes, setLoadingComposantes] = useState(false);
   
   // Для фильтра по дате
   const [filterDate, setFilterDate] = useState('');
@@ -82,6 +86,18 @@ function Lessons() {
         console.error('Erreur lors du chargement des salles:', err);
       } finally {
         setLoadingSalles(false);
+      }
+    }
+    // Загружаем список компонент
+    if (composantes.length === 0) {
+      try {
+        setLoadingComposantes(true);
+        const data = await getComposantes();
+        setComposantes(data);
+      } catch (err) {
+        console.error('Erreur lors du chargement des composantes:', err);
+      } finally {
+        setLoadingComposantes(false);
       }
     }
   };
@@ -402,15 +418,54 @@ function Lessons() {
               }}
             />
             
-            <TextField
+            <Autocomplete
               fullWidth
-              label="Matière"
-              name="matiere"
-              value={formData.matiere}
-              onChange={handleChange}
-              required
-              margin="normal"
-              placeholder="Ex: Mathématiques"
+              options={composantes}
+              getOptionLabel={(option) => {
+                if (typeof option === 'string') return option;
+                return option.nom ? `${option.acronyme} - ${option.nom}` : option.acronyme || '';
+              }}
+              getOptionKey={(option) => option.acronyme || Math.random().toString()}
+              isOptionEqualToValue={(option, value) => {
+                if (typeof value === 'string') return option.acronyme === value;
+                return option.acronyme === value?.acronyme;
+              }}
+              value={composantes.find(c => c.acronyme === formData.matiere) || null}
+              onChange={(event, newValue) => {
+                setFormData({
+                  ...formData,
+                  matiere: newValue?.acronyme || ''
+                });
+              }}
+              loading={loadingComposantes}
+              freeSolo
+              onInputChange={(event, newInputValue) => {
+                // Permet à l'utilisateur de taper manuellement
+                if (event?.type === 'change') {
+                  setFormData({
+                    ...formData,
+                    matiere: newInputValue
+                  });
+                }
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Matière / Composante"
+                  required
+                  margin="normal"
+                  placeholder="Choisissez ou tapez"
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <>
+                        {loadingComposantes ? <CircularProgress color="inherit" size={20} /> : null}
+                        {params.InputProps.endAdornment}
+                      </>
+                    ),
+                  }}
+                />
+              )}
             />
             
             <TextField

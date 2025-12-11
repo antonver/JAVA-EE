@@ -28,12 +28,9 @@ public class ComposanteController {
         this.batimentRepository = batimentRepository;
     }
 
-    /**
-     * Créer une nouvelle composante avec ses bâtiments
-     */
     @PostMapping
     public ResponseEntity<?> createComposante(@RequestBody ComposanteRequestDto request) {
-        // Vérifier si l'acronyme existe déjà
+
         if (composantRepository.existsById(request.getAcronyme())) {
             return ResponseEntity.badRequest().body("Une composante avec cet acronyme existe déjà");
         }
@@ -43,7 +40,6 @@ public class ComposanteController {
         composante.setNom(request.getNom());
         composante.setResponsable(request.getResponsable());
 
-        // Ajouter les bâtiments
         if (request.getBatimentCodes() != null && !request.getBatimentCodes().isEmpty()) {
             List<Batiment> batiments = batimentRepository.findAllById(request.getBatimentCodes());
             composante.setBatimentList(batiments);
@@ -55,9 +51,6 @@ public class ComposanteController {
         return ResponseEntity.ok(composante);
     }
 
-    /**
-     * Mettre à jour une composante existante
-     */
     @PatchMapping("/{acronyme}")
     public ResponseEntity<?> updateComposante(@PathVariable String acronyme, @RequestBody ComposanteRequestDto request) {
         Composante composante = composantRepository.findById(acronyme)
@@ -70,7 +63,6 @@ public class ComposanteController {
             composante.setResponsable(request.getResponsable());
         }
 
-        // Mettre à jour les bâtiments
         if (request.getBatimentCodes() != null) {
             List<Batiment> batiments = batimentRepository.findAllById(request.getBatimentCodes());
             composante.setBatimentList(batiments);
@@ -80,9 +72,6 @@ public class ComposanteController {
         return ResponseEntity.ok(composante);
     }
 
-    /**
-     * Supprimer une composante
-     */
     @DeleteMapping("/{acronyme}")
     public ResponseEntity<?> deleteComposante(@PathVariable String acronyme) {
         if (!composantRepository.existsById(acronyme)) {

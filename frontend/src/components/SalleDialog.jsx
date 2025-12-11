@@ -78,7 +78,7 @@ function SalleDialog({ open, onClose, salle, onSave }) {
         typeS: formData.typeS,
         etage: formData.etage,
         acces: formData.acces,
-        batiment: formData.batimentCodeB ? `/batiments/${formData.batimentCodeB}` : null
+        batimentCodeB: formData.batimentCodeB || null
       };
 
       if (salle) {

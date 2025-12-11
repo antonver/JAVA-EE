@@ -116,7 +116,7 @@ function Admin() {
   const loadSalles = async () => {
     try {
       setLoading(true);
-      // Utiliser le controller admin pour obtenir les données complètes
+      // Utiliser le controller admin pour obtenir les données complètes avec batiment
       const response = await api.get('/admin/data/salles');
       console.log('📦 Salles loaded:', response.data);
       setSalles(Array.isArray(response.data) ? response.data : []);
@@ -189,9 +189,10 @@ function Admin() {
         case 'batiment':
           await api.delete(`/batiments/${item.codeB}`);
           loadBatiments();
+          loadSalles(); // Обновляем залы, т.к. они удаляются вместе со зданием
           break;
         case 'campus':
-          await api.delete(`/campus/${item.nomC}`);
+          await api.delete(`/campus-admin/${item.nomC}`);
           loadCampus();
           break;
         case 'salle':
@@ -555,6 +556,7 @@ function Admin() {
               <TableHead>
                 <TableRow>
                   <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Numéro</TableCell>
+                  <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Bâtiment</TableCell>
                   <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Type</TableCell>
                   <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Capacité</TableCell>
                   <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem', borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>Étage</TableCell>
@@ -565,7 +567,7 @@ function Admin() {
               <TableBody>
                 {salles.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} align="center" sx={{ py: 6, borderBottom: 'none' }}>
+                    <TableCell colSpan={7} align="center" sx={{ py: 6, borderBottom: 'none' }}>
                       <Typography sx={{ color: 'rgba(255, 255, 255, 0.4)' }}>Aucune salle trouvée</Typography>
                     </TableCell>
                   </TableRow>
@@ -573,6 +575,7 @@ function Admin() {
                   salles.map((salle, index) => (
                     <TableRow key={salle.numS || `salle-${index}`} sx={{ '&:hover': { bgcolor: 'rgba(184, 255, 0, 0.02)' }, '& td': { borderBottom: '1px solid rgba(255, 255, 255, 0.04)' } }}>
                       <TableCell sx={{ color: '#b8ff00', fontWeight: 500 }}>{salle.numS || 'N/A'}</TableCell>
+                      <TableCell sx={{ color: 'rgba(255, 255, 255, 0.6)', fontFamily: '"JetBrains Mono", monospace', fontSize: '0.85rem' }}>{salle.batiment?.codeB || '—'}</TableCell>
                       <TableCell sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>{salle.typeS || 'N/A'}</TableCell>
                       <TableCell sx={{ color: 'rgba(255, 255, 255, 0.8)', fontFamily: '"JetBrains Mono", monospace' }}>{salle.capacite || 0}</TableCell>
                       <TableCell sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>{salle.etage || 'N/A'}</TableCell>

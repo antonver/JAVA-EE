@@ -2,6 +2,7 @@ package Ex.control;
 
 import Ex.Role;
 import Ex.domain.UserRepository;
+import Ex.dto.UserRoleUpdateDto;
 import Ex.modele.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,14 +28,13 @@ public class UserManagementController {
     }
 
     @PatchMapping("/{id}/role")
-    public ResponseEntity<?> updateUserRole(@PathVariable Integer id, @RequestBody Map<String, String> body) {
-        String roleStr = body.get("role");
-        if (roleStr == null) {
+    public ResponseEntity<?> updateUserRole(@PathVariable Integer id, @RequestBody UserRoleUpdateDto request) {
+        if (request.role() == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Role is required"));
         }
 
         try {
-            Role newRole = Role.valueOf(roleStr.toUpperCase());
+            Role newRole = Role.valueOf(request.role().toUpperCase());
             
             return userRepository.findById(id)
                 .map(user -> {
@@ -50,7 +50,7 @@ public class UserManagementController {
                 
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of(
-                "error", "Invalid role: " + roleStr,
+                "error", "Invalid role: " + request.role(),
                 "validRoles", List.of(Role.values())
             ));
         }
@@ -66,4 +66,3 @@ public class UserManagementController {
             .orElse(ResponseEntity.notFound().build());
     }
 }
-

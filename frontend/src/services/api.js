@@ -71,16 +71,20 @@ export const logout = async () => {
 };
 
 /**
- * Получить список всех зданий
+ * Получить список зданий для карты (доступно всем)
  * @returns {Promise} - Список зданий
  */
 export const getBatiments = async () => {
-  const response = await api.get('/batiments');
-  // Spring Data REST возвращает данные в формате HATEOAS
-  // Извлекаем массив из _embedded.batiments
-  if (response.data._embedded && response.data._embedded.batiments) {
-    return response.data._embedded.batiments;
-  }
+  const response = await api.get('/api/data/batiments');
+  return response.data;
+};
+
+/**
+ * Получить полные данные зданий (только для админа)
+ * @returns {Promise} - Список зданий с полной информацией
+ */
+export const getBatimentsAdmin = async () => {
+  const response = await api.get('/admin/data/batiments');
   return response.data;
 };
 
@@ -139,25 +143,46 @@ export const updateProfile = async (profileData) => {
 
 // === ADMIN API ===
 export const getCampus = async () => {
-  const response = await api.get('/campus');
-  return response.data._embedded?.campus || response.data;
+  const response = await api.get('/admin/data/campus');
+  return response.data;
 };
 
 export const getAllReservations = async () => {
   const response = await api.get('/reservations');
-  return response.data._embedded?.reservations || response.data;
+  return response.data;
 };
 
 /**
- * Récupérer la liste de toutes les salles
+ * Récupérer la liste de toutes les salles (pour tous les utilisateurs)
  * @returns {Promise} - Liste des salles
  */
 export const getSalles = async () => {
-  const response = await api.get('/salles');
-  // Spring Data REST format HATEOAS
-  if (response.data._embedded && response.data._embedded.salles) {
-    return response.data._embedded.salles;
-  }
+  const response = await api.get('/api/data/salles');
+  return response.data;
+};
+
+/**
+ * Récupérer la liste de toutes les composantes (pour tous les utilisateurs)
+ * @returns {Promise} - Liste des composantes
+ */
+export const getComposantes = async () => {
+  const response = await api.get('/api/data/composantes');
+  return response.data;
+};
+
+/**
+ * Récupérer les salles (admin - données complètes)
+ */
+export const getSallesAdmin = async () => {
+  const response = await api.get('/admin/data/salles');
+  return response.data;
+};
+
+/**
+ * Récupérer les composantes (admin - données complètes)
+ */
+export const getComposantesAdmin = async () => {
+  const response = await api.get('/admin/data/composantes');
   return response.data;
 };
 

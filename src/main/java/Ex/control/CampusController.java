@@ -1,6 +1,7 @@
 package Ex.control;
 
 import Ex.domain.*;
+import Ex.dto.CampusRequestDto;
 import Ex.modele.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -8,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Contrôleur REST pour la gestion des Campus
@@ -44,19 +44,15 @@ public class CampusController {
      */
     @PostMapping
     @Transactional
-    public ResponseEntity<?> createCampus(@RequestBody Map<String, String> request) {
-        String nomC = request.get("nomC");
-        String ville = request.get("ville");
-        String universiteNom = request.get("universiteNom");
-
-        if (campusRepository.existsById(nomC)) {
+    public ResponseEntity<?> createCampus(@RequestBody CampusRequestDto request) {
+        if (campusRepository.existsById(request.nomC())) {
             return ResponseEntity.badRequest().body("Un campus avec ce nom existe déjà");
         }
 
-        Campus campus = new Campus(nomC, ville);
+        Campus campus = new Campus(request.nomC(), request.ville());
         
-        if (universiteNom != null && !universiteNom.isEmpty()) {
-            Universite universite = universityRepository.findById(universiteNom).orElse(null);
+        if (request.universiteNom() != null && !request.universiteNom().isEmpty()) {
+            Universite universite = universityRepository.findById(request.universiteNom()).orElse(null);
             campus.setUniversite(universite);
         }
 
@@ -69,18 +65,17 @@ public class CampusController {
      */
     @PatchMapping("/{nomC}")
     @Transactional
-    public ResponseEntity<?> updateCampus(@PathVariable String nomC, @RequestBody Map<String, String> request) {
+    public ResponseEntity<?> updateCampus(@PathVariable String nomC, @RequestBody CampusRequestDto request) {
         Campus campus = campusRepository.findById(nomC)
                 .orElseThrow(() -> new RuntimeException("Campus non trouvé"));
 
-        if (request.containsKey("ville")) {
-            campus.setVille(request.get("ville"));
+        if (request.ville() != null) {
+            campus.setVille(request.ville());
         }
         
-        if (request.containsKey("universiteNom")) {
-            String universiteNom = request.get("universiteNom");
-            if (universiteNom != null && !universiteNom.isEmpty()) {
-                Universite universite = universityRepository.findById(universiteNom).orElse(null);
+        if (request.universiteNom() != null) {
+            if (!request.universiteNom().isEmpty()) {
+                Universite universite = universityRepository.findById(request.universiteNom()).orElse(null);
                 campus.setUniversite(universite);
             } else {
                 campus.setUniversite(null);
@@ -93,7 +88,6 @@ public class CampusController {
 
     /**
      * Supprimer un campus avec tous ses bâtiments
-     * Gère correctement les relations ManyToMany avec Composante et les réservations
      */
     @DeleteMapping("/{nomC}")
     @Transactional
@@ -103,25 +97,21 @@ public class CampusController {
             return ResponseEntity.notFound().build();
         }
 
-        // 1. Récupérer tous les bâtiments du campus
         List<Batiment> batiments = batimentRepository.findAll().stream()
                 .filter(b -> b.getCampus() != null && b.getCampus().getNomC().equals(nomC))
                 .toList();
 
-        // 2. Récupérer toutes les salles des bâtiments du campus
         List<Salle> salles = salleRepository.findAll().stream()
                 .filter(s -> s.getBatiment() != null && 
                         s.getBatiment().getCampus() != null && 
                         s.getBatiment().getCampus().getNomC().equals(nomC))
                 .toList();
 
-        // 3. Supprimer toutes les réservations liées à ces salles
         for (Salle salle : salles) {
             List<Reservation> reservations = reservationRepository.findBySalle(salle);
             reservationRepository.deleteAll(reservations);
         }
 
-        // 4. Pour chaque bâtiment, supprimer les liens avec les composantes (table Exploite)
         List<Composante> allComposantes = composantRepository.findAll();
         for (Composante composante : allComposantes) {
             if (composante.getBatimentList() != null) {
@@ -132,7 +122,6 @@ public class CampusController {
             }
         }
 
-        // 5. Supprimer le campus (cascade supprimera les bâtiments et salles)
         campusRepository.delete(campus);
         
         return ResponseEntity.ok("Campus supprimé avec " + batiments.size() + " bâtiment(s) et " + salles.size() + " salle(s)");

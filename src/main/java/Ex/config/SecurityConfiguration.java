@@ -62,6 +62,9 @@ public class SecurityConfiguration {
                         // Разрешить доступ к API расстояния
                         .requestMatchers("/distance/**").permitAll()
                         
+                        // API данных (карта, залы, компоненты) - для всех аутентифицированных
+                        .requestMatchers("/api/data/**").authenticated()
+                        
                         // Доступ к профилю пользователя - для любого аутентифицированного пользователя
                         // ВАЖНО: это правило должно быть ПЕРЕД общим /users/** правилом
                         .requestMatchers("/users/me").authenticated()

@@ -145,8 +145,12 @@ public class CampusService  implements ICampusService {
     public Campus updateCampus(String id, Campus updatedCampus) {
         return cr.findById(id)
                 .map(campus -> {
-                    campus.setVille(updatedCampus.getVille());
-                    campus.setBatiments(updatedCampus.getBatiments());
+                    if (updatedCampus.getVille() != null) {
+                        campus.setVille(updatedCampus.getVille());
+                    }
+                    if (updatedCampus.getBatiments() != null) {
+                        campus.setBatiments(updatedCampus.getBatiments());
+                    }
                     return cr.save(campus);
                 })
                 .orElseThrow(() -> new RuntimeException("Campus not found with nomC: " + id));
